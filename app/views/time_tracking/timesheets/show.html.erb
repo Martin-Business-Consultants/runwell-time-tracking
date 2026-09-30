@@ -1,0 +1,50 @@
+<% @page_title = "Time" %>
+
+<% content_for :header do %>
+<% end %>
+
+<div class="filters margin-block-end">
+  <%= render "layouts/shared/quick_filter", title: "Week…", param: :week, current: @week,
+        options: [ [ "This week", "this" ], [ "Last week", "last" ] ] %>
+  <% if can?(:view_everyones_time) %>
+    <%= render "layouts/shared/quick_filter", title: "Whose…", param: :person, current: @person,
+          options: [ [ "My time", "me" ], [ "Everyone", "everyone" ] ] %>
+  <% end %>
+</div>
+
+<section class="settings">
+  <div class="settings__panel panel shadow txt-align-start">
+    <h1 class="page-title"><%= @page_title %></h1>
+    <section class="settings__section">
+      <header>
+        <h2 class="divider"><%= l @days.first, format: :short %> – <%= l @days.last, format: :short %> <span class="txt-subtle"><%= duration @entries.sum(&:minutes) %></span></h2>
+      </header>
+
+      <% by_day = @entries.group_by(&:worked_on) %>
+      <% @days.each do |day| %>
+        <%# herb:key day.to_s %>
+        <% entries = by_day.fetch(day, []) %>
+        <div class="flex flex-column margin-block-end">
+          <div class="flex align-center gap-half txt-small">
+            <strong><%= l day, format: "%A %b %-d" %></strong>
+            <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+            <span class="txt-subtle"><%= entries.any? ? duration(entries.sum(&:minutes)) : "—" %></span>
+          </div>
+          <ul class="settings__scrollable-list">
+            <% entries.each do |entry| %>
+              <%# herb:key entry.id %>
+              <li class="flex align-center gap-half txt-small" data-filter-target="item">
+                <div class="txt-align-start overflow-ellipsis min-width">
+                  <%= link_to entry.label, time_entry_path(entry), class: "txt-ink" %>
+                  <span class="txt-subtle"><%= [ entry.engagement&.ref, entry.client&.name, (entry.user.display_name if @person == "everyone"), entry.note.presence ].compact.join(" · ") %></span>
+                </div>
+                <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+                <strong class="txt-nowrap"><%= duration entry.minutes %></strong>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+    </section>
+  </div>
+</section>

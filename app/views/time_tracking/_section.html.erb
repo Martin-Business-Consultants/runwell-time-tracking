@@ -1,0 +1,35 @@
+<%# locals: (trackable:) %>
+<%# Time on a client, engagement or todo, like its notes and documents. A client's and an
+    engagement's include everything under them. %>
+<% entries = TimeTracking::Entry.for(trackable) %>
+<% finished = entries.recent.preload(:user, :trackable) %>
+<% total = finished.sum(:minutes) %>
+<section class="settings__section" id="time">
+  <header>
+    <h2 class="divider">Time <span class="txt-subtle"><%= duration total %></span></h2>
+  </header>
+
+  <ul class="settings__scrollable-list">
+    <% finished.limit(15).each do |entry| %>
+      <%# herb:key entry.id %>
+      <li class="flex align-center gap-half" data-filter-target="item">
+        <div class="txt-align-start overflow-ellipsis min-width txt-small">
+          <strong><%= duration entry.minutes %></strong>
+          <span class="txt-subtle">
+            <%= person_tag entry.user %> · <%= l entry.worked_on, format: :short %><%= " · " + entry.label if entry.trackable != trackable %><%= " · " + entry.note if entry.note.present? %>
+          </span>
+        </div>
+        <% if entry.user == Current.user %>
+          <hr class="separator--horizontal flex-item-grow txt-subtle" aria-hidden="true">
+          <%= render "layouts/shared/delete_dialog", name: "this time", path: time_tracking_entry_path(entry), trigger_class: "txt-small" %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+
+  <% if finished.any? && !trackable.is_a?(Todo) %>
+    <p class="txt-x-small txt-subtle margin-none">
+      <%= safe_join(finished.group_by(&:user).map { |user, group| person_tag(user) + " " + duration(group.sum(&:minutes)) }, " · ") %>
+    </p>
+  <% end %>
+</section>

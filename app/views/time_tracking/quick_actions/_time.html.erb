@@ -1,0 +1,11 @@
+<%# locals: (form_id:) %>
+<%= form_with url: time_tracking_entries_path, scope: :entry, id: form_id, namespace: "quick_action", class: "flex flex-column gap txt-small", data: { turbo_frame: "_top" } do |form| %>
+  <div class="flex flex-wrap gap-half">
+    <%= form.text_field :duration, required: true, class: "input flex-item-grow", autocomplete: "off", placeholder: "1:30, 90 or 1.5h", aria: { label: "Duration" } %>
+    <%= date_input form, :worked_on, value: Date.current, class: "input flex-item-grow", aria: { label: "Worked on" } %>
+  </div>
+  <%= form.text_field :note, class: "input full-width", autocomplete: "off", placeholder: "What you did (optional)", aria: { label: "Note" } %>
+  <div class="flex gap-half justify-center">
+    <button type="submit" class="btn btn--link">Log time</button>
+  </div>
+<% end %>
