@@ -1,0 +1,6 @@
+/.bundle
+/log
+/tmp
+/runner/target
+*.gem
+.DS_Store
