@@ -3,9 +3,6 @@ module TimeTracking
   # only through Runwell::Plugins, model load hooks and "event.runwell". The core never
   # refers to it; remove the gem and the app runs as before.
   class Engine < ::Rails::Engine
-    initializer "time_tracking.migrations" do |app|
-      config.paths["db/migrate"].expanded.each { |path| app.config.paths["db/migrate"] << path }
-    end
 
     # Routes join the app's own route set (as time_tracking_*), so the core layout's helpers
     # work on the plugin's pages.
@@ -30,8 +27,8 @@ module TimeTracking
     end
 
     config.to_prepare do
-      Runwell::Plugins.register :time_tracking, name: "Time tracking", version: "0.1.0", author: "Runwell",
-        bundled: true, enabled_by_default: false,
+      Runwell::Plugins.register :time_tracking, name: "Time tracking", version: TimeTracking::VERSION, author: "Runwell",
+        enabled_by_default: false, requires: ">= 2.1.0", homepage: "https://github.com/Martin-Business-Consultants/runwell-time-tracking",
         description: "Log time on clients, engagements and work, with totals and a weekly timesheet. Keeps its own table and reads core records by id."
       Runwell::Plugins.slot :todo_panel, :time_tracking, "time_tracking/slots/todo_panel"
       Runwell::Plugins.slot :engagement_panel, :time_tracking, "time_tracking/slots/engagement_panel"
